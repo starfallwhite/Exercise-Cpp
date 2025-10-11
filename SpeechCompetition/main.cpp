@@ -14,7 +14,31 @@ public:
     //显示菜单
     void showmenu();
 
+    //开始比赛
+    void startGame();
+    //保存数据
+
+    //清空数据
+
+    //退出程序
+    void exitSys();
 };
+
+//选手类
+class speecher{
+public:
+    speecher(string Name,float Score){
+        m_Name = Name;
+        m_Score = Score;
+    }
+    string showName(){return m_Name;}
+    float showScore(){return m_Score;}
+
+private:
+    string m_Name;
+    float m_Score;
+
+};                                                             
 
 //显示菜单
 void speechManage::showmenu(){
@@ -34,17 +58,34 @@ void speechManage::showmenu(){
 //选手分组
 
 
-//第一轮比赛
+//第一轮比赛  分组--打分--排序
 
-//第二轮比赛
+//第二轮比赛    打分---排序
 
-//保存结果
+//1.开始比赛
+void speechManage::startGame(){
+    //第一轮12人
+    vector<speecher> First_speecher;
 
-//清空结果
+    //第二轮6人
+    vector<speecher> Second_speecher;
 
-//退出程序
+    
+    //决胜者3人
+    vector<speecher> Last_speecher;
 
-//菜单
+
+}
+//2.保存结果
+
+//3.清空结果
+
+//4.退出程序
+void speechManage:: exitSys(){
+    cout<<"欢迎下次使用"<<endl;
+    system("pause");
+    exit(0);
+}
 
 
 void test01(){
@@ -52,8 +93,36 @@ void test01(){
 }
 
 int main(){
+    speechManage speech;
     
-    test01();
+    int chioce = 0;
+
+    while(true){
+        speech.showmenu();
+        cin>>chioce;
+        switch (chioce)
+        {
+        case 1:
+            /* code */
+            break;
+
+        case 2:
+            /* code */
+            break;
+
+        case 3:
+            /* code */
+            break;
+
+        case 4:
+            speech.exitSys();
+            break;
+
+        default:
+            system("cls");//清屏
+            break;
+        }
+    }
 
     return 0;
 }
