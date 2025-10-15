@@ -50,7 +50,7 @@ public:
         m_Name = Name;
         m_Score = Score;
     }
-    
+
     speecher(const speecher& other){
         m_Name = other.m_Name;
         m_Score = other.m_Score;
@@ -130,6 +130,10 @@ void speechManage::speecheScore(vector<int>v_id){
             (*mp_it).second.setScore(score);
         }
     }
+}
+//打印 打分结果选手信息
+void speechManage::printSpeecher(vector<int>v_id){
+    
 }
 //第一轮比赛  分组--打分--排序
 
