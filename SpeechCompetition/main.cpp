@@ -9,6 +9,26 @@ using namespace std;
 
 //人数
 //#define 
+//选手类
+class speecher{
+public:
+    speecher(string Name,float Score){
+        m_Name = Name;
+        m_Score = Score;
+    }
+
+    speecher(const speecher& other){
+        m_Name = other.m_Name;
+        m_Score = other.m_Score;
+    }
+    string getName(){return m_Name;}
+    float getScore(){return m_Score;}
+    void setScore(float score){m_Score = score;}//修改分数
+private:
+    string m_Name;
+    float m_Score;
+
+};  
 
 //建立演讲管理类封装程序
 class speechManage{
@@ -53,28 +73,7 @@ public:
     void scoreSort(vector<int>& v_id);
 };
 
-//选手类
-class speecher{
-public:
-    speecher(string Name,float Score){
-        m_Name = Name;
-        m_Score = Score;
-    }
-
-    speecher(const speecher& other){
-        m_Name = other.m_Name;
-        m_Score = other.m_Score;
-    }
-    string getName(){return m_Name;}
-    float getScore(){return m_Score;}
-    void setScore(float score){m_Score = score;}//修改分数
-
-
-private:
-    string m_Name;
-    float m_Score;
-
-};                                                             
+                                                           
 
 //显示菜单
 void speechManage::showmenu(){
@@ -95,7 +94,7 @@ void speechManage::createSpeech(){
     int id = 10001;
     for(int i = 0; i < 12; i++){
         name += nameseed[i];
-        id += i;
+        id += 1;
         speecher sp(name,0);
 
         this->First_speecher.push_back(id);
@@ -109,7 +108,9 @@ void speechManage::createSpeech(){
 //第一轮比赛  分组--打分--排序
 void speechManage::firstecohGame(){
     //随机分组
-    random_shuffle(First_speecher.begin(),First_speecher.end());
+    random_device rd;
+    mt19937 gen(rd());
+    shuffle(First_speecher.begin(),First_speecher.end(),gen);
     vector<int>v1(First_speecher.begin(),First_speecher.begin()+First_speecher.size()/2);
     vector<int>v2(First_speecher.begin()+First_speecher.size()/2,First_speecher.end());
     //打分
@@ -137,7 +138,9 @@ void speechManage::firstecohGame(){
 //第二轮比赛    打分---排序
 void speechManage::secondecohGame(){
     //抽签
-    random_shuffle(this->Second_speecher.begin(),this->Second_speecher.end());
+    random_device rd;
+    mt19937 gen(rd());
+    shuffle(this->Second_speecher.begin(),this->Second_speecher.end(),gen);
     //打分
     this->speecheScore(this->Second_speecher);
     //显示抽签打分结果
@@ -165,6 +168,10 @@ void speechManage::saveVictory(){
     
     ofstream fid;
     fid.open("VictoryRecord.csv",ios::app);
+    if(!fid.is_open()){
+        cerr << "无法打开 VictoryRecord.csv 保存结果" << endl;
+        return;
+    }
     if(needHeader){
         fid << "id,name,score" << endl;
     }
