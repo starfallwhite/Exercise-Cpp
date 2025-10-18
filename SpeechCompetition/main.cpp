@@ -5,6 +5,9 @@
 #include<map>
 #include<random>
 #include<fstream>
+#include<cmath> //for std::nextafter()
+#include<limits> //for std::numeric_limits()
+#include<regex>
 using namespace std;
 
 //人数
@@ -51,26 +54,28 @@ public:
     //开始比赛
     void startGame();
     //保存数据
-    void saveVictory();
+    void saveRecord();
     //查看数据
-
+    void loadRecord();
     //清空数据
-
+    void clearRecord();
     //退出程序
     void exitSys();
 
     //创建选手
     void createSpeech();
     //第一轮比赛
-    void firstecohGame();
+    void firstEpochGame();
     //第二轮比赛 
-    void secondecohGame();
+    void secondEpochGame();
     //比赛打分,六个人
     void speecheScore(vector<int>& v_id);
     //打印选手得分信息  id name score
     void printSpeecher(vector<int>& v_id);
     //得分排序
     void scoreSort(vector<int>& v_id);
+    //分割字段读取结果
+    vector<string> splitString(const string& str);
 };
 
                                                            
@@ -89,24 +94,27 @@ void speechManage::showmenu(){
 
 //初始化创建参赛选手
 void speechManage::createSpeech(){
+    //每次开始比赛清空数据避免错误
+    First_speecher.clear();
+    m_speecher.clear();
+
     string nameseed = "ABCDEFGHIJKL";
     string name = "选手";
     int id = 10001;
     for(int i = 0; i < 12; i++){
         name += nameseed[i];
-        id += 1;
         speecher sp(name,0);
 
         this->First_speecher.push_back(id);
         this->m_speecher.insert(make_pair(id,sp));
-
+        id += 1;
         name = "选手";
     }
 }
 
 //选手分组打分
 //第一轮比赛  分组--打分--排序
-void speechManage::firstecohGame(){
+void speechManage::firstEpochGame(){
     //随机分组
     random_device rd;
     mt19937 gen(rd());
@@ -136,7 +144,7 @@ void speechManage::firstecohGame(){
     cout<<endl;
 }
 //第二轮比赛    打分---排序
-void speechManage::secondecohGame(){
+void speechManage::secondEpochGame(){
     //抽签
     random_device rd;
     mt19937 gen(rd());
@@ -158,8 +166,8 @@ void speechManage::secondecohGame(){
     cout<<endl;
 }
 //保存获胜者结果
-void speechManage::saveVictory(){
-    std::ifstream fin("VictoryRecord.csv", std::ios::binary | std::ios::ate);
+void speechManage::saveRecord(){
+    ifstream fin("VictoryRecord.csv", std::ios::binary | std::ios::ate);
     bool needHeader = true;
     if(fin.is_open()){
         needHeader = (fin.tellg() == 0); // 文件长度为0则需要表头
@@ -175,7 +183,7 @@ void speechManage::saveVictory(){
     if(needHeader){
         fid << "id,name,score" << endl;
     }
-    fid<<"第 "<<this->m_gameEcoh<<" 届比赛结果"<<endl;
+    
     for(vector<int>::iterator it = this->Last_speecher.begin(); it != this->Last_speecher.end(); it++){
         map<int,speecher>::iterator mp_it = m_speecher.find(*it);
         if(mp_it == m_speecher.end()){
@@ -186,7 +194,7 @@ void speechManage::saveVictory(){
         }
     }
     fid.close();
-    cout<<"文件记录已保存"<<endl;
+    cout<<"第 "<<this->m_gameEcoh<<" 届比赛结果记录已保存"<<endl;
 }
 //打分
 void speechManage::speecheScore(vector<int>& v_id){
@@ -238,22 +246,85 @@ void speechManage::scoreSort(vector<int>& v_id){
         it_vId++;
     }
 }
+//分割字段
+vector<string> speechManage::splitString(const string& input){
+    vector<string> tokens;
+    regex pattren(",");
+    //-1控制it返回结果的参数，-1表示返回震泽分割后的子字符串
+    sregex_token_iterator it(input.begin(),input.end(),pattren,-1);
+    sregex_token_iterator end;
+
+    while(it != end){
+        if(!it->str().empty()){
+            tokens.push_back(*it);
+        }
+        it++;
+    }
+
+
+    return tokens;
+}
 
 //1.开始比赛
 void speechManage::startGame(){
     //创建选手
     this->createSpeech();
     //第一轮12人，分组打分
-    this->firstecohGame();
+    this->firstEpochGame();
     //第二轮6人
-    this->secondecohGame();
+    this->secondEpochGame();
     //保存结果
-    this->saveVictory();
+    this->saveRecord();
+    //比赛轮数自增
+    ++this->m_gameEcoh;
 }
 //2.查看结果
-
+void speechManage::loadRecord(){
+    ifstream fin("VictoryRecord.csv", std::ios::in);
+    if(!fin.is_open()){
+        cout<<"记录文件不存在"<<endl;
+        fin.close();
+        return;
+    }
+    string header,dataline;
+    vector<string> splitedData;
+    int gameEpoch = 1;
+    //读取表头
+    getline(fin,header);
+    if(!getline(fin,dataline)){
+        cout<<"记录为空"<<endl;
+        fin.close();
+        return;
+    }
+    else{
+        splitedData = this->splitString(dataline);    
+        splitedData.resize(3);
+        cout<<"第 "<<gameEpoch <<" 界比赛: "<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+        gameEpoch++;
+        while(getline(fin,dataline)){
+            splitedData = this->splitString(dataline);
+            cout<<"第 "<<gameEpoch <<" 界比赛: "<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+            gameEpoch++;
+        }
+    }
+}
 //3.清空结果
+void speechManage::clearRecord(){
+    cout<<"是否确认清空记录"<<endl<<"按 1 确认"<<endl<<"按 2 返回"<<endl;
+    int seletc = 0;
+    cin>>seletc;
+    if(seletc == 1){
+        //trunc方式打开文件，会先将原来的文件删除再重新创建一个空文件
+        ofstream ofs("VictoryRecord.csv", std::ios::trunc);
+        ofs.close();
 
+        cout<<"清空成功"<<endl;
+    }
+
+    system("pause");
+    system("cls");
+
+}
 //4.退出程序
 void speechManage:: exitSys(){
     cout<<"欢迎下次使用"<<endl;
@@ -267,7 +338,6 @@ void test01(){
 }
 
 int main(){
-    srand((unsigned int)time(NULL));
     speechManage speech;
     
     int chioce = 0;
@@ -278,15 +348,15 @@ int main(){
         switch (chioce)
         {
         case 1:
-            /* code */
+            speech.startGame();
             break;
 
         case 2:
-            /* code */
+            speech.loadRecord();
             break;
 
         case 3:
-            /* code */
+            speech.clearRecord();
             break;
 
         case 4:
