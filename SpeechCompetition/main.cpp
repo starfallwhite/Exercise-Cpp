@@ -75,7 +75,7 @@ public:
     //得分排序
     void scoreSort(vector<int>& v_id);
     //分割字段读取结果
-    vector<string> splitString(const string& str);
+    vector<string> splitString(const string& str,string strDelimiter);
 };
 
                                                            
@@ -190,7 +190,7 @@ void speechManage::saveRecord(){
             cout<<"保存获胜者信息过程中未查询到该选手的id"<<endl;
         }
         else{
-            fid<<(*it)<<","<<mp_it->second.getName()<<","<<mp_it->second.getScore()<<endl;
+            fid<<(*it)<<","<<mp_it->second.getName()<<","<<mp_it->second.getScore()<<";";
         }
     }
     fid.close();
@@ -247,9 +247,9 @@ void speechManage::scoreSort(vector<int>& v_id){
     }
 }
 //分割字段
-vector<string> speechManage::splitString(const string& input){
+vector<string> speechManage::splitString(const string& input,string strDelimiter){
     vector<string> tokens;
-    regex pattren(",");
+    regex pattren(strDelimiter);
     //-1控制it返回结果的参数，-1表示返回震泽分割后的子字符串
     sregex_token_iterator it(input.begin(),input.end(),pattren,-1);
     sregex_token_iterator end;
@@ -271,6 +271,7 @@ void speechManage::startGame(){
     this->createSpeech();
     //第一轮12人，分组打分
     this->firstEpochGame();
+    
     //第二轮6人
     this->secondEpochGame();
     //保存结果
@@ -287,7 +288,7 @@ void speechManage::loadRecord(){
         return;
     }
     string header,dataline;
-    vector<string> splitedData;
+    vector<string> splitedData,gamerData;
     int gameEpoch = 1;
     //读取表头
     getline(fin,header);
@@ -297,13 +298,26 @@ void speechManage::loadRecord(){
         return;
     }
     else{
-        splitedData = this->splitString(dataline);    
-        splitedData.resize(3);
-        cout<<"第 "<<gameEpoch <<" 界比赛: "<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+        gamerData = this->splitString(dataline,";");
+        cout<<"第 "<<gameEpoch <<" 界比赛: "<<endl;
+        for (vector<string>::iterator it = gamerData.begin();it != gamerData.end();it++)
+        {
+            splitedData = this->splitString(*it,",");
+            splitedData.resize(3);
+            cout<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+        }
         gameEpoch++;
+
         while(getline(fin,dataline)){
-            splitedData = this->splitString(dataline);
-            cout<<"第 "<<gameEpoch <<" 界比赛: "<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+
+            gamerData = this->splitString(dataline,";");
+            cout<<"第 "<<gameEpoch <<" 界比赛: "<<endl;
+            for (vector<string>::iterator it = gamerData.begin();it != gamerData.end();it++)
+            {
+                splitedData = this->splitString(*it,",");
+                splitedData.resize(3);
+                cout<<"id: "<<splitedData[0]<<"   name: "<<splitedData[1]<<"    score: "<<splitedData[2]<<endl;
+            }
             gameEpoch++;
         }
     }
